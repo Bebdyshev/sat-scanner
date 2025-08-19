@@ -1,6 +1,6 @@
 // API client for communicating with the backend FastAPI server
 
-const BACKEND_URL = 'http://localhost:8000'
+const BACKEND_URL = 'https://backend-production-1b7f.up.railway.app'
 
 export interface Question {
   id: number
