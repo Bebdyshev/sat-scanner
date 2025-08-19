@@ -55,14 +55,18 @@ export default function HomePage() {
     setIsUploading(true)
 
     try {
-      // Store file in sessionStorage for the analyze page
-      const reader = new FileReader()
-      reader.onload = () => {
-        sessionStorage.setItem("pdfFile", reader.result as string)
+      // Store only the object URL (small string) to avoid sessionStorage quota issues
+      if (fileUrl) {
+        sessionStorage.setItem("pdfFile", fileUrl)
+        sessionStorage.setItem("pdfFileName", file.name)
+        router.push("/analyze")
+      } else {
+        const url = URL.createObjectURL(file)
+        setFileUrl(url)
+        sessionStorage.setItem("pdfFile", url)
         sessionStorage.setItem("pdfFileName", file.name)
         router.push("/analyze")
       }
-      reader.readAsDataURL(file)
     } catch (error) {
       console.error("Error processing file:", error)
       setIsUploading(false)
