@@ -136,3 +136,27 @@ export async function isBackendAvailable(): Promise<boolean> {
     return false
   }
 }
+
+// Map backend question format to frontend Question shape
+export function mapBackendToFrontendQuestions(backendResult: any): Question[] {
+  if (!backendResult || !Array.isArray(backendResult.questions)) return []
+  const letterOrder = ['A', 'B', 'C', 'D']
+  return backendResult.questions.map((q: any, index: number) => {
+    const options: string[] = letterOrder.map((letter) => {
+      const match = (q.options || []).find((o: any) => (o.letter || '').toUpperCase() === letter)
+      return match?.text ?? ''
+    })
+    const correctIndex = letterOrder.findIndex((letter) =>
+      (q.options || []).some((o: any) => (o.letter || '').toUpperCase() === letter && o.is_correct)
+    )
+
+    return {
+      id: (q.number as number) ?? index + 1,
+      type: 'multiple-choice',
+      question: (q.title as string) ?? '',
+      options,
+      correctAnswer: correctIndex >= 0 ? correctIndex : undefined,
+      explanation: (q.description as string) ?? '',
+    }
+  })
+}
