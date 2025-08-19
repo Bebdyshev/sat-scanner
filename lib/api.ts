@@ -65,37 +65,7 @@ export async function uploadSATQuestions(
   return response.json()
 }
 
-/**
- * Upload a PDF file for ACT question analysis
- */
-export async function uploadACTQuestions(
-  file: File,
-  title?: string,
-  description?: string
-): Promise<AnalysisResponse> {
-  const formData = new FormData()
-  formData.append('file', file)
-  
-  if (title) {
-    formData.append('title', title)
-  }
-  
-  if (description) {
-    formData.append('description', description)
-  }
-
-  const response = await fetch(`${BACKEND_URL}/leak/upload-act-questions-json`, {
-    method: 'POST',
-    body: formData,
-  })
-
-  if (!response.ok) {
-    const error: ApiError = await response.json()
-    throw new Error(error.detail || `HTTP error! status: ${response.status}`)
-  }
-
-  return response.json()
-}
+// ACT question upload removed
 
 /**
  * Get analysis results by analysis ID
