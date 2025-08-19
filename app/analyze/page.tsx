@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2, Edit3, Eye, ArrowLeft } from "lucide-react"
 import { JsonExport } from "@/components/json-export"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { uploadSATQuestions, type AnalysisResponse } from "@/lib/api"
 
 interface Question {
   id: number
@@ -41,27 +42,19 @@ export default function AnalyzePage() {
         setPdfUrl(pdfData)
         setFileName(pdfFileName)
 
-        // Convert base64 to blob for API call
+        // Convert object URL to File for backend call
         const response = await fetch(pdfData)
         const blob = await response.blob()
         const file = new File([blob], pdfFileName, { type: "application/pdf" })
 
-        // Send to API for analysis
-        const formData = new FormData()
-        formData.append("file", file)
+        // Directly call backend to avoid serverless payload limits
+        const analysisResult: AnalysisResponse = await uploadSATQuestions(
+          file,
+          "Extracted Questions",
+          "Questions extracted from uploaded PDF"
+        )
 
-        const apiResponse = await fetch("/api/analyze", {
-          method: "POST",
-          body: formData,
-        })
-
-        const result = await apiResponse.json()
-
-        if (result.success) {
-          setQuestions(result.questions)
-        } else {
-          setError(result.error || "Failed to analyze PDF")
-        }
+        setQuestions(analysisResult.questions)
       } catch (err) {
         setError("An error occurred while analyzing the PDF")
         console.error(err)
