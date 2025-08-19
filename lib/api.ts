@@ -22,6 +22,30 @@ export interface AnalysisResponse {
   summary: string
 }
 
+// Backend response shapes (derived from FastAPI Pydantic models)
+export interface BackendQuestionOption {
+  letter: "A" | "B" | "C" | "D"
+  text: string
+  is_correct?: boolean | null
+}
+
+export interface BackendQuestion {
+  number: number
+  description?: string | null
+  title: string
+  options: BackendQuestionOption[]
+}
+
+export interface UploadQuestionsJsonResponse {
+  analysis_id: string
+  title: string
+  description?: string | null
+  total_questions: number
+  questions: BackendQuestion[]
+  created_at: string
+  summary: unknown
+}
+
 export interface UploadResponse {
   message: string
   filename: string
@@ -62,7 +86,17 @@ export async function uploadSATQuestions(
     throw new Error(error.detail || `HTTP error! status: ${response.status}`)
   }
 
-  return response.json()
+  const backendJson: UploadQuestionsJsonResponse = await response.json()
+
+  return {
+    analysis_id: backendJson.analysis_id,
+    title: backendJson.title,
+    description: backendJson.description ?? "",
+    total_questions: backendJson.total_questions,
+    questions: mapBackendToFrontendQuestions(backendJson),
+    created_at: backendJson.created_at,
+    summary: typeof backendJson.summary === "string" ? backendJson.summary : JSON.stringify(backendJson.summary),
+  }
 }
 
 // ACT question upload removed
@@ -108,25 +142,25 @@ export async function isBackendAvailable(): Promise<boolean> {
 }
 
 // Map backend question format to frontend Question shape
-export function mapBackendToFrontendQuestions(backendResult: any): Question[] {
+export function mapBackendToFrontendQuestions(backendResult: UploadQuestionsJsonResponse): Question[] {
   if (!backendResult || !Array.isArray(backendResult.questions)) return []
-  const letterOrder = ['A', 'B', 'C', 'D']
-  return backendResult.questions.map((q: any, index: number) => {
+  const letterOrder: Array<BackendQuestionOption["letter"]> = ["A", "B", "C", "D"]
+  return backendResult.questions.map((q: BackendQuestion, index: number) => {
     const options: string[] = letterOrder.map((letter) => {
-      const match = (q.options || []).find((o: any) => (o.letter || '').toUpperCase() === letter)
-      return match?.text ?? ''
+      const match = (q.options || []).find((o: BackendQuestionOption) => (o.letter || "").toUpperCase() === letter)
+      return match?.text ?? ""
     })
     const correctIndex = letterOrder.findIndex((letter) =>
-      (q.options || []).some((o: any) => (o.letter || '').toUpperCase() === letter && o.is_correct)
+      (q.options || []).some((o: BackendQuestionOption) => (o.letter || "").toUpperCase() === letter && !!o.is_correct)
     )
 
     return {
-      id: (q.number as number) ?? index + 1,
+      id: q.number ?? index + 1,
       type: 'multiple-choice',
-      question: (q.title as string) ?? '',
+      question: q.title ?? '',
       options,
       correctAnswer: correctIndex >= 0 ? correctIndex : undefined,
-      explanation: (q.description as string) ?? '',
+      explanation: q.description ?? '',
     }
   })
 }

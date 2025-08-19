@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2, Edit3, Eye, ArrowLeft } from "lucide-react"
 import { JsonExport } from "@/components/json-export"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { uploadSATQuestions, mapBackendToFrontendQuestions } from "@/lib/api"
+import { uploadSATQuestions } from "@/lib/api"
 
 interface Question {
   id: number
@@ -54,7 +54,7 @@ export default function AnalyzePage() {
           "Questions extracted from uploaded PDF"
         )
 
-        setQuestions(mapBackendToFrontendQuestions(analysisResult))
+        setQuestions(analysisResult.questions)
       } catch (err) {
         setError("An error occurred while analyzing the PDF")
         console.error(err)
