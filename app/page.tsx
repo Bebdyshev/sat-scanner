@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Upload, FileText, Loader2, Sparkles, Eye } from "lucide-react"
+import { Upload, FileText, Loader2, Sparkles } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function HomePage() {

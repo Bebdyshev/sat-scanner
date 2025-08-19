@@ -44,7 +44,7 @@ export default function EditPage() {
     setFileName(pdfFileName)
   }, [router])
 
-  const updateQuestion = (id: number, field: keyof Question, value: any) => {
+  const updateQuestion = <K extends keyof Question>(id: number, field: K, value: Question[K]) => {
     setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, [field]: value } : q)))
   }
 

@@ -50,8 +50,8 @@ export function JsonExport({ questions, fileName, variant = "outline", size = "d
     }
   }
 
-  const validateQuestions = () => {
-    const issues = []
+  const validateQuestions = (): string[] => {
+    const issues: string[] = []
     questions.forEach((q, index) => {
       if (!q.question.trim()) issues.push(`Question ${index + 1}: Missing question text`)
       if (q.type === "multiple-choice" && (!q.options || q.options.length < 2))
