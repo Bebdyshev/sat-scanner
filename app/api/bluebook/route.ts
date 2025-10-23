@@ -27,7 +27,8 @@ export async function POST(request: NextRequest) {
         'Sec-Fetch-Dest': 'empty',
         'Sec-Fetch-Mode': 'cors',
         'Sec-Fetch-Site': 'same-site',
-        'Priority': 'u=4',
+        'Priority': 'u=0',
+        'TE': 'trailers',
         'Content-Type': 'application/json',
         ...headers
       }
@@ -37,8 +38,21 @@ export async function POST(request: NextRequest) {
       fetchOptions.body = JSON.stringify(data)
     }
 
+    // Log the full request details
+    console.log('=== FULL REQUEST DETAILS ===')
+    console.log('URL:', url)
+    console.log('Method:', method)
+    console.log('Headers:', fetchOptions.headers)
+    console.log('Body:', fetchOptions.body)
+    console.log('============================')
+
     const response = await fetch(url, fetchOptions)
     const responseData = await response.text()
+
+    // Log the response for debugging
+    console.log('API Response Status:', response.status)
+    console.log('API Response Headers:', Object.fromEntries(response.headers.entries()))
+    console.log('API Response Data:', responseData.substring(0, 500) + '...')
 
     // Try to parse as JSON, fallback to text
     let parsedData
@@ -46,6 +60,23 @@ export async function POST(request: NextRequest) {
       parsedData = JSON.parse(responseData)
     } catch {
       parsedData = responseData
+    }
+
+    // Handle different response statuses
+    if (!response.ok) {
+      console.error('API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        data: parsedData
+      })
+      
+      return NextResponse.json({
+        error: `API Error: ${response.status} ${response.statusText}`,
+        data: parsedData,
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      }, { status: response.status })
     }
 
     return NextResponse.json({
