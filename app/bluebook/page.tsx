@@ -1,14 +1,14 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { bluebookAPI, type DateLocationSetsResponse, type TestData } from "@/lib/bluebook-api"
-import { Copy, Check, Download, Eye, EyeOff, LogIn, LogOut, RefreshCw } from "lucide-react"
+import { Copy, Check, Download, LogIn, LogOut, RefreshCw } from "lucide-react"
 
 export default function BluebookPage() {
   const [email, setEmail] = useState("yoyaye7963@fogdiver.com")
@@ -21,7 +21,52 @@ export default function BluebookPage() {
   const [error, setError] = useState("")
   const [copied, setCopied] = useState(false)
   const [selectedTest, setSelectedTest] = useState<TestData | null>(null)
-  const [testData, setTestData] = useState<any>(null)
+  const [testData, setTestData] = useState<unknown>(null)
+
+  const handleLogin = useCallback(async () => {
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter email and password")
+      return false
+    }
+
+    setIsLoggingIn(true)
+    setError("")
+
+    try {
+      await bluebookAPI.login(email.trim(), password.trim())
+      setIsAuthenticated(true)
+      setError("")
+      return true
+    } catch (err) {
+      setError("Login failed: " + (err instanceof Error ? err.message : "Unknown error"))
+      return false
+    } finally {
+      setIsLoggingIn(false)
+    }
+  }, [email, password])
+
+  const handleLogout = () => {
+    bluebookAPI.logout()
+    setIsAuthenticated(false)
+    setDateLocationSets(null)
+    setSelectedTest(null)
+    setTestData(null)
+    setError("")
+  }
+
+  const handleFetchData = useCallback(async () => {
+    setIsLoading(true)
+    setError("")
+
+    try {
+      const data = await bluebookAPI.getDateLocationSets()
+      setDateLocationSets(data)
+    } catch (err) {
+      setError("Failed to fetch data: " + (err instanceof Error ? err.message : "Unknown error"))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
   // Auto-login and fetch data on page load
   useEffect(() => {
@@ -43,52 +88,7 @@ export default function BluebookPage() {
     }
 
     autoLoginAndFetch()
-  }, [isAutoLoading])
-
-  const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      setError("Please enter email and password")
-      return false
-    }
-
-    setIsLoggingIn(true)
-    setError("")
-
-    try {
-      await bluebookAPI.login(email.trim(), password.trim())
-      setIsAuthenticated(true)
-      setError("")
-      return true
-    } catch (err) {
-      setError("Login failed: " + (err instanceof Error ? err.message : "Unknown error"))
-      return false
-    } finally {
-      setIsLoggingIn(false)
-    }
-  }
-
-  const handleLogout = () => {
-    bluebookAPI.logout()
-    setIsAuthenticated(false)
-    setDateLocationSets(null)
-    setSelectedTest(null)
-    setTestData(null)
-    setError("")
-  }
-
-  const handleFetchData = async () => {
-    setIsLoading(true)
-    setError("")
-
-    try {
-      const data = await bluebookAPI.getDateLocationSets()
-      setDateLocationSets(data)
-    } catch (err) {
-      setError("Failed to fetch data: " + (err instanceof Error ? err.message : "Unknown error"))
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  }, [isAutoLoading, isAuthenticated, handleLogin, handleFetchData])
 
   const handleSelectTest = async (test: TestData) => {
     setSelectedTest(test)
@@ -115,7 +115,7 @@ export default function BluebookPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleDownload = (data: any, filename: string) => {
+  const handleDownload = (data: unknown, filename: string) => {
     const jsonString = JSON.stringify(data, null, 2)
     const blob = new Blob([jsonString], { type: 'application/json' })
     const url = URL.createObjectURL(blob)

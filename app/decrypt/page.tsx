@@ -4,11 +4,10 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { comprehensiveDecrypt } from "@/lib/decrypt"
-import { Unlock, Copy, Check, AlertCircle, Download, Eye, EyeOff } from "lucide-react"
+import { Unlock, Copy, Check, AlertCircle, Download } from "lucide-react"
 
 export default function DecryptPage() {
   const [encryptedInput, setEncryptedInput] = useState("")
@@ -17,8 +16,7 @@ export default function DecryptPage() {
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState("")
   const [decryptionMethod, setDecryptionMethod] = useState("")
-  const [showFormatted, setShowFormatted] = useState(true)
-  const [jsonData, setJsonData] = useState<any>(null)
+  const [jsonData, setJsonData] = useState<Array<Record<string, unknown>> | null>(null)
 
   const handleDecrypt = async () => {
     if (!encryptedInput.trim()) {
@@ -224,7 +222,7 @@ export default function DecryptPage() {
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="font-medium text-sm">
                           Item {index + 1}
-                          {item.type && (
+                          {typeof item.type === 'string' && (
                             <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-1 rounded">
                               {item.type}
                             </span>
@@ -240,28 +238,28 @@ export default function DecryptPage() {
                       </div>
                       
                       <div className="space-y-2">
-                        {item.question && (
+                        {typeof item.question === 'string' && (
                           <div>
                             <label className="text-xs font-medium text-muted-foreground">Question:</label>
                             <p className="text-sm mt-1">{item.question}</p>
                           </div>
                         )}
                         
-                        {item.article && (
+                        {typeof item.article === 'string' && (
                           <div>
                             <label className="text-xs font-medium text-muted-foreground">Article:</label>
-                            <div 
+                            <div
                               className="text-sm mt-1 max-h-20 overflow-y-auto border border-border rounded p-2"
                               dangerouslySetInnerHTML={{ __html: item.article }}
                             />
                           </div>
                         )}
                         
-                        {item.options && (
+                        {Array.isArray(item.options) && (
                           <div>
                             <label className="text-xs font-medium text-muted-foreground">Options:</label>
                             <div className="text-sm mt-1 space-y-1">
-                              {item.options.map((option: any, optIndex: number) => (
+                              {item.options.map((option: { name: string; content: string }, optIndex: number) => (
                                 <div key={optIndex} className="flex items-center gap-2">
                                   <span className="font-medium">{option.name}:</span>
                                   <span>{option.content}</span>
@@ -271,7 +269,7 @@ export default function DecryptPage() {
                           </div>
                         )}
                         
-                        {item.correct && (
+                        {typeof item.correct === 'string' && (
                           <div>
                             <label className="text-xs font-medium text-muted-foreground">Correct Answer:</label>
                             <p className="text-sm mt-1 font-medium text-green-600 dark:text-green-400">

@@ -206,7 +206,7 @@ export default function JsonDisplayPage() {
               ) : (
                 <div className="min-h-[400px] p-4 bg-muted rounded-lg">
                   <p className="text-muted-foreground text-center">
-                    JSON data is hidden. Click "Show Formatted" to view.
+                    JSON data is hidden. Click &quot;Show Formatted&quot; to view.
                   </p>
                 </div>
               )}

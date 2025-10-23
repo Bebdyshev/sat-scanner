@@ -1,5 +1,4 @@
 // Bluebook API integration
-const API_BASE_URL = 'https://api-prod.bluebook.plus'
 const PROXY_URL = '/api/bluebook'
 
 export interface LoginResponse {
@@ -114,7 +113,7 @@ export class BluebookAPI {
     }
   }
 
-  async getTestData(testId: string): Promise<any> {
+  async getTestData(testId: string): Promise<unknown> {
     if (!this.accessToken) {
       throw new Error('Not authenticated. Please login first.')
     }

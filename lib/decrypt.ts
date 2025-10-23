@@ -76,7 +76,7 @@ export function decryptString(encryptedString: string, keyIndex: 1 | 2 = 1): str
       if (result && result.length > 0 && !result.includes('\u0000')) {
         return result
       }
-    } catch (error) {
+    } catch {
       // Continue to next method
       continue
     }
@@ -243,7 +243,6 @@ export function encryptString(plainText: string, keyIndex: 1 | 2 = 1): string {
  * @returns The decrypted string or null if all methods fail
  */
 export function tryDifferentFormats(encryptedString: string): string | null {
-  const keys = [KEY_1, KEY_2]
   
   // Try different string formats
   const formats = [
