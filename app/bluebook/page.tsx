@@ -5,7 +5,6 @@ import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { bluebookAPI, type DateLocationSetsResponse, type TestData } from "@/lib/bluebook-api"
@@ -22,7 +21,6 @@ export default function BluebookPage() {
   const [error, setError] = useState("")
   const [copied, setCopied] = useState(false)
   const [selectedTest, setSelectedTest] = useState<TestData | null>(null)
-  const [testData, setTestData] = useState<unknown>(null)
   const [jsonData, setJsonData] = useState<Array<Record<string, unknown>> | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -53,7 +51,6 @@ export default function BluebookPage() {
     setIsAuthenticated(false)
     setDateLocationSets(null)
     setSelectedTest(null)
-    setTestData(null)
     setJsonData(null)
     setIsModalOpen(false)
     setError("")
@@ -111,7 +108,6 @@ export default function BluebookPage() {
       const testId = test.module1 || test.module2
       if (testId) {
         const data = await bluebookAPI.getTestData(testId, test.value)
-        setTestData(data)
         
         // Try to parse as JSON for structured display
         try {
@@ -141,19 +137,6 @@ export default function BluebookPage() {
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
-  }
-
-  const handleDownload = (data: unknown, filename: string) => {
-    const jsonString = JSON.stringify(data, null, 2)
-    const blob = new Blob([jsonString], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
   }
 
   const handleCopyJson = () => {
