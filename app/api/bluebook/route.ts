@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
 
     // Log the full request details
     console.log('=== FULL REQUEST DETAILS ===')
+    console.log('Environment:', process.env.NODE_ENV)
     console.log('URL:', url)
     console.log('Method:', method)
     console.log('Headers:', fetchOptions.headers)
@@ -52,7 +53,15 @@ export async function POST(request: NextRequest) {
     // Log the response for debugging
     console.log('API Response Status:', response.status)
     console.log('API Response Headers:', Object.fromEntries(response.headers.entries()))
-    console.log('API Response Data:', responseData.substring(0, 500) + '...')
+    console.log('API Response Data Length:', responseData.length)
+    console.log('API Response Data Type:', typeof responseData)
+    console.log('API Response Data Preview:', responseData.substring(0, 500) + '...')
+    
+    // Check if response contains binary/encrypted data
+    if (responseData.includes('\u0000') || responseData.includes('\x00')) {
+      console.log('⚠️  Detected binary/encrypted data in response')
+      console.log('Binary data preview (hex):', Buffer.from(responseData.substring(0, 100), 'binary').toString('hex'))
+    }
 
     // Try to parse as JSON, fallback to text
     let parsedData

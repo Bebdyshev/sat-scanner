@@ -42,12 +42,14 @@ export class BluebookAPI {
    * @returns Decrypted data or original data if not encrypted
    */
   private decryptApiResponse(data: unknown): unknown {
+    console.log('=== API RESPONSE DECRYPTION ===')
+    console.log('Data type:', typeof data)
+    console.log('Data length:', typeof data === 'string' ? data.length : 'N/A')
+    console.log('First 200 chars:', typeof data === 'string' ? data.substring(0, 200) : 'N/A')
+    
     // Check if data is a hex string (encrypted)
     if (typeof data === 'string' && /^[0-9A-Fa-f]+$/.test(data)) {
-      console.log('=== API RESPONSE DECRYPTION ===')
       console.log('Detected encrypted hex response')
-      console.log('Hex length:', data.length)
-      console.log('First 100 chars:', data.substring(0, 100))
       
       try {
         const decrypted = comprehensiveDecrypt(data)
@@ -76,6 +78,42 @@ export class BluebookAPI {
       }
     }
     
+    // Check if data contains binary/encrypted content (like the 403 response)
+    if (typeof data === 'string' && data.includes('\u0000') && data.length > 100) {
+      console.log('Detected potential binary/encrypted response')
+      
+      try {
+        // Try to convert to hex and decrypt
+        const hexString = Buffer.from(data, 'binary').toString('hex')
+        console.log('Converted to hex, length:', hexString.length)
+        
+        const decrypted = comprehensiveDecrypt(hexString)
+        if (decrypted) {
+          console.log('Successfully decrypted binary response')
+          console.log('Decrypted length:', decrypted.length)
+          console.log('First 200 chars:', decrypted.substring(0, 200))
+          
+          // Try to parse as JSON
+          try {
+            const jsonData = JSON.parse(decrypted)
+            console.log('Successfully parsed as JSON')
+            console.log('JSON keys:', Object.keys(jsonData))
+            return jsonData
+          } catch {
+            console.log('Not valid JSON, returning decrypted string')
+            return decrypted
+          }
+        } else {
+          console.log('Failed to decrypt binary data, returning raw data')
+          return data
+        }
+      } catch (error) {
+        console.error('Binary decryption error:', error)
+        return data
+      }
+    }
+    
+    console.log('No encryption detected, returning original data')
     return data
   }
 
@@ -106,6 +144,11 @@ export class BluebookAPI {
       const result = await response.json()
       
       if (result.error) {
+        // Handle 403 Forbidden specifically
+        if (result.status === 403) {
+          throw new Error(`Login failed (403): ${result.error}. Invalid credentials or account restrictions.`)
+        }
+        
         throw new Error(result.error)
       }
 
@@ -178,6 +221,12 @@ export class BluebookAPI {
       
       if (result.error) {
         console.error('API Error Response:', result)
+        
+        // Handle 403 Forbidden specifically
+        if (result.status === 403) {
+          throw new Error(`Access denied (403): ${result.error}. This might be due to invalid credentials, expired session, or API restrictions.`)
+        }
+        
         throw new Error(result.error)
       }
 
@@ -244,6 +293,12 @@ export class BluebookAPI {
       
       if (result.error) {
         console.error('API Error Response:', result)
+        
+        // Handle 403 Forbidden specifically
+        if (result.status === 403) {
+          throw new Error(`Access denied (403): ${result.error}. This might be due to invalid credentials, expired session, or API restrictions.`)
+        }
+        
         throw new Error(result.error)
       }
 
