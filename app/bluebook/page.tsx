@@ -277,6 +277,39 @@ export default function BluebookPage() {
             {dateLocationSets && (
               <Card className="p-6">
                 <h2 className="text-xl font-semibold mb-4">Available Tests</h2>
+                {/* English Section */}
+                {dateLocationSets.English && dateLocationSets.English.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-3 text-green-600 dark:text-green-400">
+                      English ({dateLocationSets.English.length} tests)
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {dateLocationSets.English.map((test, index) => (
+                        <div key={index} className="border border-border rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium text-sm">{test.value}</h4>
+                            {test.vip === 1 && (
+                              <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded">
+                                VIP
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-2">
+                            Date: {test.date}
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => handleSelectTest(test)}
+                          >
+                            Select Test
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 
                 {/* Math Section */}
                 {dateLocationSets.Math && dateLocationSets.Math.length > 0 && (
@@ -312,39 +345,7 @@ export default function BluebookPage() {
                   </div>
                 )}
 
-                {/* English Section */}
-                {dateLocationSets.English && dateLocationSets.English.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-medium mb-3 text-green-600 dark:text-green-400">
-                      English ({dateLocationSets.English.length} tests)
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {dateLocationSets.English.map((test, index) => (
-                        <div key={index} className="border border-border rounded-lg p-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium text-sm">{test.value}</h4>
-                            {test.vip === 1 && (
-                              <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded">
-                                VIP
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground mb-2">
-                            Date: {test.date}
-                          </p>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full"
-                            onClick={() => handleSelectTest(test)}
-                          >
-                            Select Test
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                
               </Card>
             )}
 
